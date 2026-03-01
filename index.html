@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PAGO Racing Pro</title>
+    <style>
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif; touch-action: none; display: flex; justify-content: center; }
+        #gameContainer { position: relative; width: 100%; max-width: 500px; height: 100vh; background: #2c3e50; border-left: 6px solid #f1c40f; border-right: 6px solid #f1c40f; }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        /* Menu & Flash Styling */
+        #menuOverlay { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; }
+        
+        #splashCredit { position: absolute; top: 50px; background: linear-gradient(45deg, #f1c40f, #f39c12); color: #000; padding: 10px 25px; font-size: 16px; font-weight: 900; border-radius: 50px; text-transform: uppercase; border: 2px solid #fff; display: block; }
+        
+        h1 { color: #f1c40f; font-size: 32px; text-align: center; margin: 0; text-shadow: 0 0 15px #f1c40f; font-weight: 900; display: block; }
+        
+        #loading { color: #fff; font-size: 18px; margin-top: 20px; animation: blink 0.8s infinite; font-style: italic; display: block; }
+        
+        @keyframes blink { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+        /* Buttons Container - Hidden for first 5 seconds */
+        #btnContainer { display: none; flex-direction: column; align-items: center; margin-top: 30px; width: 100%; }
+        
+        .menu-btn { width: 250px; padding: 16px; margin: 10px; font-size: 20px; font-weight: bold; cursor: pointer; border-radius: 50px; border: none; transition: 0.2s; color: white; }
+        #playBtn { background: #2ecc71; box-shadow: 0 6px #27ae60; }
+        #colorMenuBtn { background: #f1c40f; color: #000; box-shadow: 0 6px #d4ac0d; }
+        #quitBtn { background: #e74c3c; box-shadow: 0 6px #c0392b; }
+
+        /* Other UI */
+        #colorOverlay, #crashMenu { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 400; padding: 20px; }
+        .color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; width: 100%; max-width: 350px; }
+        .color-dot { width: 100%; aspect-ratio: 1; border-radius: 10px; border: 3px solid transparent; cursor: pointer; }
+        .color-dot.active { border-color: white; box-shadow: 0 0 15px white; }
+        .score-box { position: absolute; top: 20px; width: 100%; color: white; font-size: 28px; text-align: center; z-index: 10; display: none; text-shadow: 2px 2px #000; font-weight: bold; }
+        .controls { position: absolute; bottom: 40px; width: 100%; display: none; justify-content: space-around; z-index: 150; }
+        .control-btn { width: 110px; height: 85px; background: rgba(255,255,255,0.2); color: white; border: 3px solid white; border-radius: 20px; font-size: 20px; font-weight: bold; }
+        #levelText { position: absolute; top: 70px; width: 100%; color: #f1c40f; font-size: 18px; text-align: center; font-weight: bold; display: none; z-index: 10; text-shadow: 1px 1px #000; }
+    </style>
+</head>
+<body>
+
+    <div id="gameContainer">
+        <div class="score-box" id="scoreDiv">SCORE: <span id="scoreVal">0</span></div>
+        <div id="levelText">LEVEL: 1</div>
+
+        <div id="menuOverlay">
+            <div id="splashCredit">Made By SRK</div>
+            <h1>PAGO RACING PRO</h1>
+            <div id="loading">Loading Assets...</div>
+            
+            <div id="btnContainer">
+                <button id="playBtn" class="menu-btn" onclick="startGame()">PLAY GAME</button>
+                <button id="colorMenuBtn" class="menu-btn" onclick="openColorPicker()">SELECT CAR COLOR</button>
+                <button id="quitBtn" class="menu-btn" onclick="quitGame()">QUIT</button>
+            </div>
+        </div>
+
+        <div id="colorOverlay">
+            <h2 style="color: #f1c40f; margin-bottom: 20px;">CHOOSE YOUR COLOR</h2>
+            <div class="color-grid" id="colorGrid"></div>
+            <button class="menu-btn" style="background: #3498db; width: 150px;" onclick="closeColorPicker()">OK</button>
+        </div>
+
+        <div id="crashMenu">
+            <h2 style="color: #e74c3c; font-size: 40px; margin: 0;">CRASHED!</h2>
+            <div id="finalScoreTxt" style="color: white; font-size: 20px; margin: 20px 0;">Score: 0</div>
+            <button class="menu-btn" style="background:#2ecc71;" onclick="restartFromCrash()">RESTART</button>
+            <button class="menu-btn" style="background:#3498db;" onclick="goToHome()">HOME</button>
+            <button class="menu-btn" style="background:#e74c3c;" onclick="quitGame()">QUIT</button>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+        
+        <div class="controls" id="gameControls">
+            <button class="control-btn" onclick="moveLeft()">LEFT</button>
+            <button class="control-btn" onclick="moveRight()">RIGHT</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const menu = document.getElementById('menuOverlay');
+        const loadingTxt = document.getElementById('loading');
+        const btnBox = document.getElementById('btnContainer');
+        const colorOverlay = document.getElementById('colorOverlay');
+        const grid = document.getElementById('colorGrid');
+        const lvlTxt = document.getElementById('levelText');
+
+        let playerColor = "#f1c40f";
+        let score, speed, gameActive = false, currentLane, enemies, lineOffset, enemyTimeout, animationId;
+        let spawnDelay;
+
+        const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#008000', '#FFC0CB', '#A52A2A', '#808080', '#FFFFFF', '#F1C40F', '#E67E22', '#E74C3C', '#9B59B6', '#3498DB', '#1ABC9C', '#2ECC71'];
+
+        colors.forEach(col => {
+            let div = document.createElement('div');
+            div.className = 'color-dot';
+            div.style.backgroundColor = col;
+            div.onclick = () => {
+                playerColor = col;
+                document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+                div.classList.add('active');
+            };
+            if(col === playerColor) div.classList.add('active');
+            grid.appendChild(div);
+        });
+
+        function setupCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        window.addEventListener('resize', setupCanvas);
+        setupCanvas();
+
+        // --- FLASH LOGIC (5 SECONDS) ---
+        setTimeout(() => {
+            loadingTxt.style.display = "none"; // 5 sec baad loading text hatayen
+            btnBox.style.display = "flex";     // 5 sec baad menu buttons dikhayen
+        }, 5000);
+
+        function startGame() {
+            menu.style.display = 'none';
+            document.getElementById('scoreDiv').style.display = 'block';
+            document.getElementById('gameControls').style.display = 'flex';
+            lvlTxt.style.display = 'block';
+            resetGame();
+        }
+
+        function restartFromCrash() {
+            document.getElementById('crashMenu').style.display = 'none';
+            resetGame();
+        }
+
+        function goToHome() {
+            document.getElementById('crashMenu').style.display = 'none';
+            document.getElementById('scoreDiv').style.display = 'none';
+            document.getElementById('gameControls').style.display = 'none';
+            lvlTxt.style.display = 'none';
+            menu.style.display = 'flex';
+            loadingTxt.style.display = "none";
+            btnBox.style.display = "flex";
+        }
+
+        function resetGame() {
+            gameActive = false;
+            cancelAnimationFrame(animationId);
+            clearTimeout(enemyTimeout);
+            score = 0; speed = 5; spawnDelay = 1800;
+            currentLane = 1; enemies = []; lineOffset = 0;
+            gameActive = true;
+            spawnEnemies();
+            update();
+        }
+
+        function spawnEnemies() {
+            if (!gameActive) return;
+            let lane = Math.floor(Math.random() * 3);
+            let lw = canvas.width / 3;
+            enemies.push({ x: lane * lw + (lw/2 - 25), y: -150, color: `hsl(${Math.random() * 360}, 80%, 60%)` });
+            enemyTimeout = setTimeout(spawnEnemies, spawnDelay);
+        }
+
+        function drawCar(x, y, color, name) {
+            ctx.fillStyle = "#111";
+            ctx.fillRect(x-5, y+10, 10, 20); ctx.fillRect(x+45, y+10, 10, 20);
+            ctx.fillRect(x-5, y+60, 10, 20); ctx.fillRect(x+45, y+60, 10, 20);
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, 50, 90);
+            ctx.fillStyle = "rgba(255,255,255,0.4)";
+            ctx.fillRect(x+5, y+15, 40, 25);
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 12px Arial"; ctx.textAlign = "center";
+            ctx.fillText(name, x+25, y+45);
+        }
+
+        function update() {
+            if (!gameActive) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let lw = canvas.width / 3;
+            lineOffset = (lineOffset + speed) % 100;
+            ctx.setLineDash([40, 60]); ctx.strokeStyle = "rgba(255,255,255,0.4)";
+            ctx.beginPath();
+            ctx.moveTo(lw, -100 + lineOffset); ctx.lineTo(lw, canvas.height + 100);
+            ctx.moveTo(lw*2, -100 + lineOffset); ctx.lineTo(lw*2, canvas.height + 100);
+            ctx.stroke();
+
+            score += 0.2; let s = Math.floor(score);
+            document.getElementById('scoreVal').innerText = s;
+
+            if (s < 100) { speed = 6; spawnDelay = 1500; lvlTxt.innerText = "LEVEL: EASY"; }
+            else if (s < 200) { speed = 8; spawnDelay = 1100; lvlTxt.innerText = "LEVEL: MEDIUM"; }
+            else if (s < 350) { speed = 11; spawnDelay = 700; lvlTxt.innerText = "LEVEL: HARD"; }
+            else { speed = 15; spawnDelay = 450; lvlTxt.innerText = "LEVEL: INSANE!"; }
+
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                enemies[i].y += speed;
+                drawCar(enemies[i].x, enemies[i].y, enemies[i].color, "PAGO");
+                let px = currentLane * lw + (lw/2 - 25);
+                let py = canvas.height - 180;
+                if (px < enemies[i].x + 45 && px + 45 > enemies[i].x && py < enemies[i].y + 85 && py + 85 > enemies[i].y) {
+                    gameActive = false;
+                    document.getElementById('finalScoreTxt').innerText = "SCORE: " + s;
+                    document.getElementById('crashMenu').style.display = "flex";
+                    return;
+                }
+                if (enemies[i].y > canvas.height) enemies.splice(i, 1);
+            }
+            drawCar(currentLane * lw + (lw/2 - 25), canvas.height - 180, playerColor, "SRK");
+            animationId = requestAnimationFrame(update);
+        }
+
+        function moveLeft() { if (currentLane > 0) currentLane--; }
+        function moveRight() { if (currentLane < 2) currentLane++; }
+
+        function openColorPicker() { colorOverlay.style.display = "flex"; }
+        function closeColorPicker() { colorOverlay.style.display = "none"; }
+
+        // --- QUIT LOGIC ---
+        function quitGame() { 
+            window.close();
+            window.history.back();
+            setTimeout(() => { window.location.href = "about:blank"; }, 100);
+        }
+    </script>
+</body>
+</html>
