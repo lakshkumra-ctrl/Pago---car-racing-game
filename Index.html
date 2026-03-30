@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Pago AI Ultra</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(45deg, #ff416c, #ff4b2b);
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #f1f5f9;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 380px;
+            padding: 25px 30px;
+            border-radius: 24px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            animation: fadeIn 0.8s ease;
+        }
+
+        h2 {
+            font-weight: 600;
+            /* Heading ko ek line mein rakhne ke liye settings */
+            font-size: 1.4rem; 
+            white-space: nowrap; 
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 25px;
+            color: white;
+            text-shadow: 0 0 15px rgba(255, 65, 108, 0.4);
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.6);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            margin-bottom: 15px;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: #ff416c;
+            box-shadow: 0 0 0 3px rgba(255, 65, 108, 0.2);
+        }
+
+        button {
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+         
+            color: white;
+            background: var(--primary-gradient);
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            margin: 5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 75, 43, 0.4);
+        }
+
+        #output {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: #e2e8f0;
+        }
+
+        .note {
+            margin-top: 20px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🔥 Pago AI Generator 🔥</h2>
+
+    <input type="text" id="name" placeholder="Enter your name">
+
+    <div class="btn-group">
+        <button onclick="generateBio()">Generate</button>
+        <button id="copyBtn" onclick="copyBio()">Copy</button>
+    </div>
+
+    <div id="output">Generated bio will appear here...</div>
+
+    <div class="note">
+        ✨ UNLIMITED BIOS • ⚡ INSTANT • 💯 FREE
+    </div>
+</div>
+
+<script>
+    let emojis = ["😎","🔥","👑","💫","🚀","❤️","😈","✨","💥","🎯","⚡","🖤","🌟","🥶","😏","😇","🤩","🦁","🐉","💎","😎","🔥","👑","💫","🚀","❤️","😈","✨","💥","🎯",
+"⚡","🖤","🌟","🥶","😏","😇","🤩","🦁","🐉","💎",
+"😄","😁","😊","🙂","😉","😍","😘","🤗","😌","😴",
+"😜","🤪","😋","😎","😤","😡","🥰","😎","🤓","🫡",
+"👻","💀","☠️","🎉","🎊","🌈","🌊","🌿","🍀","🔥"];
+    let lines1 = [
+  "Dream big, shine bright ✨",
+  "Living life my own way 😎",
+  "Smile is my style 😊",
+  "Simple but significant 🌿",
+  "Creating my own story 📖",
+  "Born to stand out 🔥",
+  "Keep it real always 💯",
+  "Chasing goals, not people 🎯",
+  "Happiness is my priority 😊",
+  "Silent vibes, loud results 🤫",
+  "Just vibe with life 🌊",
+  "Self love first ❤️",
+  "Stay positive always 🌈",
+  "Less talk, more action ⚡",
+  "Enjoying every moment ⏳",
+  "Confidence level: high 🚀",
+  "Good vibes only ✌️",
+  "Life is short, enjoy it 🌍",
+  "Be your own kind of beautiful 🌸",
+  "Living in the moment 🕰️",
+  "Hustle with heart ❤️",
+  "No drama, just peace ☮️",
+  "Focus on the good 🎯",
+  "Making memories daily 📸",
+  "Be original, not perfect 🌟",
+  "Positive mind, positive life 💭",
+  "Stay calm and confident 😌",
+  "Own your story 📘",
+  "Energy speaks louder ⚡",
+  "Work hard, stay humble 🙏",
+  "Believe in your journey 🛤️",
+  "Spread kindness always 🤝",
+  "Chill mode on 😎",
+  "Mindset is everything 🧠",
+  "Do what makes you happy 💫",
+  "Stay strong, stay focused 💪",
+  "Live with purpose 🎯",
+  "Just a good soul 🌼",
+  "Keep moving forward ➡️",
+  "Be the best version of you 🔝",
+  "Dream it, live it 🌙",
+  "No limits to dreams 🚀",
+  "Keep smiling always 😊",
+  "Peace over everything ☮️",
+  "Enjoy the little things 🌿",
+  "Be fearless 🔥",
+  "Glow different ✨",
+  "Calm mind, happy heart ❤️",
+  "Life is beautiful 🌸",
+  "Stay real, stay you 💯",
+  "Vibes speak louder than words 🌊","Official Account","Dream Big","King Mindset","Born to Shine","Silent Killer","Rule Breaker","Legend Vibes","No Limits","Be Yourself","Unique Soul"];
+    let lines2 = ["No Pain No Gain","Stay Positive","Never Give Up","Hustle Everyday","Create Your Own Rules","Success Loading","Respect All","Fear None","Work Hard Dream Big","Focus Mode","Dream big, win big",
+"Built different mindset",
+"Main character energy",
+"Glow up in progress",
+"Silent moves, loud results",
+"Living my best life",
+"Focus. Work. Win.",
+"Stay real, stay rare",
+"Limitless and fearless",
+"Energy never lies",
+"Making my own rules",
+"Big vibes only",
+"Creating my own lane",
+"Success is inevitable",
+"Turning dreams into reality",
+"No looking back",
+"Stay focused, stay winning",
+"Unstoppable attitude",
+"Confidence is my power",
+"Game changer mindset",
+"Positive vibes only",
+"Chasing greatness daily",
+"Not lucky, just consistent",
+"Born to shine bright",
+"Keep it moving forward",
+"Winning is a habit",
+"Different level thinking",
+"Built for more",
+"Always leveling up",
+"Mindset on elite mode",
+"Glow different every day",
+"Energy speaks louder",
+"Focused on my growth",
+"Success is my lifestyle",
+"Less talk, more results",
+"Prove them wrong",
+"Stay in your power",
+"Creating my own success",
+"Driven by purpose",
+"Rise above everything",
+"Stronger every day",
+"No limits, no fear",
+"Own your moment",
+"Do it with passion",
+"Be the difference",
+"Mind strong, goals stronger",
+"Focused on the vision",
+"Every day is progress",
+"Stay hungry, stay winning",
+"Built to inspire"];
+
+    function generateBio() {
+
+    let inputName = document.getElementById("name").value.trim();
+
+    let defaultNames = ["Legend 😎", "King 👑", "Boss 🔥", "Alpha 🐺", "Devil 😈", "Hero 💫"];
+
+    let name = inputName || defaultNames[Math.floor(Math.random() * defaultNames.length)];
+
+    let e = emojis[Math.floor(Math.random()*emojis.length)];
+    let l1 = lines1[Math.floor(Math.random()*lines1.length)];
+    let l2 = lines2[Math.floor(Math.random()*lines2.length)];
+
+    let bio = `${e} ${name} | ${l1} | ${l2}`;
+
+    document.getElementById("output").innerText = bio;
+}
+
+    function copyBio() {
+        let text = document.getElementById("output").innerText;
+        if(!text || text === "Generated bio will appear here...") return;
+        navigator.clipboard.writeText(text);
+        let btn = document.getElementById("copyBtn");
+        btn.innerText = "✅ Copied";
+        setTimeout(()=> btn.innerText="Copy", 1500);
+    }
+</script>
+
+</body>
+  </html>
+  
